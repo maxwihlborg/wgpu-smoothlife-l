@@ -11,7 +11,7 @@ import "./style.css";
 
 const COMP = true;
 
-const initScene = async ({ device, format }: RenderState) => {
+const initScene = async ({ device, format, canvas }: RenderState) => {
   const { renderModule, smoothLifeLModule } = createShaderModules(device);
 
   const vertexArray = new Float32Array(
@@ -77,7 +77,11 @@ const initScene = async ({ device, format }: RenderState) => {
     bindGroupLayouts: [bindGroupLayout],
   });
 
-  const size = v2.scl([], v2.set([], 12, 8), 50);
+  const unitSize = Math.ceil(Math.max(1, (canvas.width * canvas.height) / 1e6));
+  const size = v2.ceil(
+    [],
+    v2.scl([], v2.set([], canvas.width, canvas.height), 1 / unitSize)
+  );
   const work = v2.ceil([], v2.scl([], size, 1 / WORKGROUP_SIZE));
 
   const ubo = device.createBuffer({
@@ -231,8 +235,8 @@ document.addEventListener(
   pipe(
     fromIO(() => {
       const el = document.createElement("canvas");
-      el.width = 1200;
-      el.height = 800;
+      el.width = window.innerWidth;
+      el.height = window.innerHeight;
 
       return el;
     }),
